@@ -1,0 +1,12 @@
+{
+    "[python]": {
+        "editor.formatOnPaste": false,
+        "editor.formatOnSave": false,
+        "editor.formatOnSaveMode": "file",
+    },
+    "python.formatting.blackArgs": [
+        "--line-length",
+        "200"
+    ],
+    "python.formatting.provider": "black",
+}

@@ -1,0 +1,17 @@
+option_params:
+  K: 1
+  tau: 0.25
+stock_params:
+  S0: 1
+  sigma: 0.4
+market_params:
+  r: 0.01
+mc_params:
+  eps: 0.001
+  rnd_seed: 10
+  nb_realizations: 500 #30_000
+  nb_paths: 5_000
+  #nb_paths: 1_000_000
+display:
+  precision: 5
+  show_fig: False
