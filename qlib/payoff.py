@@ -1,6 +1,7 @@
 import numbers
 
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 class Payoff:
@@ -63,3 +64,14 @@ class Payoff:
         option_cls = cls(payoff_name=f"European digital {option_type}", payoff_type=option_type, kind="digital", payoff_function=F, params=params)
 
         return option_cls
+
+    @staticmethod
+    def show(payoff, start_ST=0, stop_ST=2, nb_steps=100):
+        ST = np.arange(start=start_ST, stop=stop_ST, step=(stop_ST - start_ST) / nb_steps)
+        FT = payoff.F(ST, payoff.params)
+
+        plt.plot(ST, FT, "-.")
+        plt.title(payoff.name)
+        plt.xlabel("ST")
+        plt.ylabel("FT")
+        plt.show()
