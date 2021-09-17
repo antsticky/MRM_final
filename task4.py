@@ -48,7 +48,7 @@ if __name__ == "__main__":
 
     # generate MC paths
     numerical_calculator = MCCalculator.european_lognormal(rnd_seed=run_config.mc_params.rnd_seed, market_params=run_config.market_params, stock_params=run_config.stock_params)
-    numerical_calculator.generate_path(T=run_config.option_params.tau, size=(run_config.mc_params.nb_paths, run_config.mc_params.nb_realizations), double_average=True)
+    numerical_calculator.generate_path(T=run_config.option_params.tau, size=(run_config.mc_params.nb_paths, run_config.mc_params.nb_realizations))
 
     # define payoffs
     digital_call_payoff = Payoff.european_digital(option_type="call", params=run_config.option_params)
