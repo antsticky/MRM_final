@@ -115,6 +115,12 @@ class CDV(Paths):
         else:
             raise KeyError("Not implemented (handle the bump with care)")
 
+    def gamma(self, eps, payoff):
+        if self.name == "European Lognormal pricer":
+            return self.calc_eu_lognormal_gamma(eps=eps, payoff=payoff)
+        else:
+            raise KeyError("Not implemented (handle the bump with care)")
+
     def calc_eu_lognormal_delta(self, eps, payoff):
         def show_checks():
             # TODO:
@@ -146,6 +152,17 @@ class CDV(Paths):
 
         # return (up_price - down_price).mean(axis=0) / (2 * eps)
         return (up_price.mean(axis=0) - down_price.mean(axis=0)) / (2 * eps)
+
+    def calc_eu_lognormal_gamma(self, eps, payoff):
+        prices = self.df * payoff.F(ST=self.paths, payoff_params=payoff.params)
+
+        up_bumped_paths = self.paths / self.S0 * (self.S0 + eps)
+        up_price = self.df * payoff.F(ST=up_bumped_paths, payoff_params=payoff.params)
+
+        down_bumped_paths = self.paths / self.S0 * (self.S0 - eps)
+        down_price = self.df * payoff.F(ST=down_bumped_paths, payoff_params=payoff.params)
+
+        return (up_price.mean(axis=0) + down_price.mean(axis=0) - 2.0*prices.mean() ) / (eps * eps)
 
     def bias(self, eps, payoff, target):
         delta = self.delta(eps=eps, payoff=payoff)

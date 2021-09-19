@@ -95,5 +95,39 @@ class Delta(Base):
             raise KeyError("Unknown option value")
 
 
-class BSCalculator(Pricer, Delta):
+class Gamma(Base):
+    def gamma(self, payoff):
+        if payoff.kind.lower() == "option":
+            gamma = self.option_gamma(payoff)
+            return gamma
+        elif payoff.kind.lower() == "digital":
+            gamma = self.digital_gamma(payoff)
+            return gamma
+        else:
+            raise KeyError("Unknown option kind")
+
+    def option_gamma(self, payoff):
+        K = payoff.params.K
+        tau = payoff.params.tau
+
+        if payoff.type.lower() in ["call", "put"]:
+            gamma = norm.pdf(self.d1(K=K, tau=tau)) / (self.S0*self.sigma*np.sqrt(tau))
+            return gamma
+        else:
+            raise KeyError("Unknown option value")
+
+    def digital_gamma(self, payoff):
+        K = payoff.params.K
+        tau = payoff.params.tau
+
+        gamma = - self.df(tau=tau) * self.d1(K=K, tau=tau) * norm.pdf(self.d2(K=K, tau=tau)) / (np.square(self.S0 * self.sigma) * tau)
+
+        if payoff.type.lower() == "call":
+             return gamma
+        elif payoff.type.lower() == "put":
+            return -gamma
+        else:
+            raise KeyError("Unknown option value")
+
+class BSCalculator(Pricer, Delta, Gamma):
     pass
