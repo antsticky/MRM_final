@@ -65,7 +65,7 @@ class Paths:
         self.tau = T
 
         # TODO: eliminate this
-        debug = True
+        debug = False
         if debug == True:
             show_checks()
 
@@ -140,7 +140,7 @@ class CDV(Paths):
         down_price = self.df * payoff.F(ST=down_bumped_paths, payoff_params=payoff.params)
 
         # TODO: eliminate this
-        debug = True
+        debug = False
         if debug == True:
             show_checks()
 

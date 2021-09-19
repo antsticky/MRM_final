@@ -85,7 +85,7 @@ class Delta(Base):
         K = payoff.params.K
         tau = payoff.params.tau
 
-        delta = self.df(tau=tau) * norm.pdf(self.d2(K=K, tau=tau)) / (K * self.sigma * np.sqrt(tau))
+        delta = self.df(tau=tau) * norm.pdf(self.d2(K=K, tau=tau)) / (self.S0 * self.sigma * np.sqrt(tau))
 
         if payoff.type.lower() == "call":
             return delta
