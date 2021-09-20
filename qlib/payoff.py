@@ -66,7 +66,10 @@ class Payoff:
         return option_cls
 
     @staticmethod
-    def show(payoff, start_ST=0, stop_ST=2, nb_steps=100):
+    def show(payoff, start_ST=0, stop_ST=2, nb_steps=100, show_fig=True):
+        if not show_fig:
+            return None
+
         ST = np.arange(start=start_ST, stop=stop_ST, step=(stop_ST - start_ST) / nb_steps)
         FT = payoff.F(ST, payoff.params)
 

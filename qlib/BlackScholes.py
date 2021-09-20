@@ -111,7 +111,7 @@ class Gamma(Base):
         tau = payoff.params.tau
 
         if payoff.type.lower() in ["call", "put"]:
-            gamma = norm.pdf(self.d1(K=K, tau=tau)) / (self.S0*self.sigma*np.sqrt(tau))
+            gamma = norm.pdf(self.d1(K=K, tau=tau)) / (self.S0 * self.sigma * np.sqrt(tau))
             return gamma
         else:
             raise KeyError("Unknown option value")
@@ -120,14 +120,62 @@ class Gamma(Base):
         K = payoff.params.K
         tau = payoff.params.tau
 
-        gamma = - self.df(tau=tau) * self.d1(K=K, tau=tau) * norm.pdf(self.d2(K=K, tau=tau)) / (np.square(self.S0 * self.sigma) * tau)
+        gamma = -self.df(tau=tau) * self.d1(K=K, tau=tau) * norm.pdf(self.d2(K=K, tau=tau)) / (np.square(self.S0 * self.sigma) * tau)
 
         if payoff.type.lower() == "call":
-             return gamma
+            return gamma
         elif payoff.type.lower() == "put":
             return -gamma
         else:
             raise KeyError("Unknown option value")
 
+
+class CDVBias(Base):
+    def delta(self, payoff, eps):
+        if payoff.kind.lower() == "option":
+            gamma = self.delta_option(payoff, eps)
+            return gamma
+        elif payoff.kind.lower() == "digital":
+            gamma = self.delta_digital(payoff, eps)
+            return gamma
+        else:
+            raise KeyError("Unknown option kind")
+
+    def delta_option(self, payoff, eps):
+        K = payoff.params.K
+        tau = payoff.params.tau
+
+        if payoff.type.lower() == "call":
+            work1 = norm.pdf(self.d1(K=K, tau=tau)) / (self.S0 * self.S0 * self.sigma * np.sqrt(tau))
+            work2 = 1 + self.d1(K=K, tau=tau) / (self.sigma * np.sqrt(tau))
+            bias = -(1.0 / 6.0) * work1 * work2 * np.square(eps)
+            return bias
+        else:
+            raise KeyError("Unknown option value")
+
+    def delta_digital(self, payoff, eps):
+        K = payoff.params.K
+        tau = payoff.params.tau
+
+        if payoff.type.lower() == "call":
+            d1 = self.d1(K=K, tau=tau)
+            d2 = self.d2(K=K, tau=tau)
+            s_sq_tau = self.sigma * tau
+
+            work1 = d2 / (pow(self.S0, 3) * np.square(self.sigma) * tau)
+
+            work21 = -2.0 * d1
+            work22 = 1.0 / s_sq_tau
+            work23 = -d1 * d2 / s_sq_tau
+
+            bias = (1.0 / 6.0) * work1 * (work21 + work22 + work23) * np.square(eps)
+
+            return bias
+        else:
+            raise KeyError("Unknown option value")
+
+
 class BSCalculator(Pricer, Delta, Gamma):
-    pass
+    def __init__(self, market_params, stock_params):
+        super().__init__(market_params, stock_params)
+        self.cdv_bias = CDVBias(market_params, stock_params)

@@ -95,8 +95,10 @@ class Paths:
         plt.show()
 
     @staticmethod
-    def show_paths(paths_class):
-        if "European" in paths_class.name:
+    def show_paths(paths_class, show_fig=True):
+        if not show_fig:
+            return None
+        elif "European" in paths_class.name:
             paths = paths_class.paths.flatten()
             Paths._histogram_plot(paths, title=paths_class.name)
         else:
@@ -162,7 +164,7 @@ class CDV(Paths):
         down_bumped_paths = self.paths / self.S0 * (self.S0 - eps)
         down_price = self.df * payoff.F(ST=down_bumped_paths, payoff_params=payoff.params)
 
-        return (up_price.mean(axis=0) + down_price.mean(axis=0) - 2.0*prices.mean() ) / (eps * eps)
+        return (up_price.mean(axis=0) + down_price.mean(axis=0) - 2.0 * prices.mean()) / (eps * eps)
 
     def bias(self, eps, payoff, target):
         delta = self.delta(eps=eps, payoff=payoff)
