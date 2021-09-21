@@ -146,7 +146,7 @@ class CDVBias(Base):
         tau = payoff.params.tau
 
         if payoff.type.lower() == "call":
-            work1 = norm.pdf(self.d1(K=K, tau=tau)) / (self.S0 * self.S0 * self.sigma * np.sqrt(tau))
+            work1 = norm.pdf(self.d1(K=K, tau=tau)) / (np.square(self.S0) * self.sigma * np.sqrt(tau))
             work2 = 1 + self.d1(K=K, tau=tau) / (self.sigma * np.sqrt(tau))
             bias = -(1.0 / 6.0) * work1 * work2 * np.square(eps)
             return bias
