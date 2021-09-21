@@ -164,11 +164,11 @@ class CDVBias(Base):
 
             work1 = d2 / (pow(self.S0, 3) * np.square(self.sigma) * tau)
 
-            work21 = -2.0 * d1
-            work22 = 1.0 / s_sq_tau
-            work23 = -d1 * d2 / s_sq_tau
+            work21 = 2.0 * d1
+            work22 = -1.0 / s_sq_tau
+            work23 = d1 * d2 / s_sq_tau
 
-            bias = (1.0 / 6.0) * work1 * (work21 + work22 + work23) * np.square(eps)
+            bias = (1.0 / 6.0) * self.df(tau=tau) * work1 * (work21 + work22 + work23) * np.square(eps)
 
             return bias
         else:
