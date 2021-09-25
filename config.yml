@@ -9,8 +9,8 @@ market_params:
 mc_params:
   eps: 0.001
   rnd_seed: 10
-  #nb_paths: 5_000
-  nb_paths: 50_000_000
+  nb_paths: 5_000
+  #nb_paths: 50_000_000
 display:
   precision: 5
-  show_fig: False
+  show_fig: True

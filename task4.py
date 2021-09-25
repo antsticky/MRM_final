@@ -2,26 +2,25 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from qlib.payoff import Payoff
-from qlib.MonteCarlo import MCCalculator
 from qlib.BlackScholes import BSCalculator
 
 from qlib.misc import read_config
 
 
 def show_fig(X, Y1s, Y2s):
-    Y1_bais, Y1_var, Y1_mse = Y1s
-    Y2_bais, Y2_var, Y2_mse = Y2s
+    Y1_bias, Y1_var, Y1_mse = Y1s
+    Y2_bias, Y2_var, Y2_mse = Y2s
 
     fig, axs = plt.subplots(3)
 
     fig.suptitle("MSE plots")
 
     # -----------------------------
-    axs[0].plot(X, Y1_bais, label=f"Digital Call", marker=".", color="red", linewidth=1)
+    axs[0].plot(X, Y1_bias, label=f"Digital Call", marker=".", color="red", linewidth=1)
     axs[0].set_ylabel("Digital Call Bias", color="red")
 
     axs02 = axs[0].twinx()
-    axs02.plot(X, Y2_bais, label=f"Standard Call", color="green", marker=".", linewidth=1)
+    axs02.plot(X, Y2_bias, label=f"Standard Call", color="green", marker=".", linewidth=1)
     axs02.set_ylabel("Standard Call Bias", color="green")
 
     # -----------------------------
@@ -46,10 +45,6 @@ def show_fig(X, Y1s, Y2s):
 if __name__ == "__main__":
     run_config = read_config(config_path="config.yml")
 
-    # generate MC paths
-    numerical_calculator = MCCalculator.european_lognormal(rnd_seed=run_config.mc_params.rnd_seed, market_params=run_config.market_params, stock_params=run_config.stock_params)
-    numerical_calculator.generate_path(T=run_config.option_params.tau, size=(run_config.mc_params.nb_paths, run_config.mc_params.nb_realizations))
-
     # define payoffs
     digital_call_payoff = Payoff.european_digital(option_type="call", params=run_config.option_params)
     call_option_payoff = Payoff.european_option(option_type="call", params=run_config.option_params)
@@ -61,31 +56,33 @@ if __name__ == "__main__":
 
     # calc MSE
     X = []
-    Y1_bais = []
+    Y1_bias = []
     Y1_var = []
     Y1_mse = []
 
-    Y2_bais = []
+    Y2_bias = []
     Y2_var = []
     Y2_mse = []
 
-    for eps in np.arange(start=0.0001, stop=0.1 + 0.01, step=0.01):
+    step_size = 0.01
+    for eps in np.arange(start=0.01, stop=0.25 + step_size, step=step_size):
         X.append(eps)
 
-        digital_call_bias = numerical_calculator.bias(eps=eps, payoff=digital_call_payoff, target=digital_delta_BS)
-        Y1_bais.append(digital_call_bias)
-        digital_call_var = numerical_calculator.var(eps=eps, payoff=digital_call_payoff)
-        Y1_var.append(digital_call_var)
-        digital_call_mse = numerical_calculator.MSE(eps=eps, payoff=digital_call_payoff, target=digital_delta_BS)
-        Y1_mse.append(digital_call_mse)
-        # TODO: Normalization
+        digital_bias = analytical_calculator.cdv_bias.delta(digital_call_payoff, eps=eps)
+        digital_var = analytical_calculator.cdv_var.delta(digital_call_payoff, eps=eps, N=run_config.mc_params.nb_paths)
+        digital_MSE = np.square(digital_bias) + digital_var
 
-        call_option_bias = numerical_calculator.bias(eps=eps, payoff=call_option_payoff, target=option_delta_BS)
-        Y2_bais.append(call_option_bias)
-        call_option_var = numerical_calculator.var(eps=eps, payoff=call_option_payoff)
-        Y2_var.append(call_option_var)
-        call_option_mse = numerical_calculator.MSE(eps=eps, payoff=call_option_payoff, target=option_delta_BS)
-        Y2_mse.append(call_option_mse)
-        # TODO: Normalization
+        Y1_bias.append(digital_bias)
+        Y1_var.append(digital_var)
+        Y1_mse.append(digital_MSE / digital_delta_BS)
 
-    show_fig(X, (Y1_bais, Y1_var, Y1_mse), (Y2_bais, Y2_var, Y2_mse))
+        option_bias = analytical_calculator.cdv_bias.delta(call_option_payoff, eps=eps)
+        option_var = analytical_calculator.cdv_var.delta(call_option_payoff, eps=eps, N=run_config.mc_params.nb_paths)
+        option_MSE = np.square(option_bias) + option_var
+
+        Y2_bias.append(option_bias)
+        Y2_var.append(option_var)
+        Y2_mse.append(option_MSE / option_delta_BS)
+
+    if run_config.display.show_fig:
+        show_fig(X, (Y1_bias, Y1_var, Y1_mse), (Y2_bias, Y2_var, Y2_mse))

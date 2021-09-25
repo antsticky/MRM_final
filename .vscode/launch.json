@@ -5,10 +5,10 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: risk measure",
+            "name": "Python: risk measures",
             "type": "python",
             "request": "launch",
-            "module": "task2",
+            "module": "task1",
         }
     ]
 }

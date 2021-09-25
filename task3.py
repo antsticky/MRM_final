@@ -1,5 +1,6 @@
+import numpy as np
+
 from qlib.payoff import Payoff
-from qlib.MonteCarlo import MCCalculator
 from qlib.BlackScholes import BSCalculator
 
 from qlib.misc import read_config
@@ -10,22 +11,22 @@ if __name__ == "__main__":
     # define calculators
     analytical_calculator = BSCalculator(market_params=run_config.market_params, stock_params=run_config.stock_params)
 
-    numerical_calculator = MCCalculator.european_lognormal(rnd_seed=run_config.mc_params.rnd_seed, market_params=run_config.market_params, stock_params=run_config.stock_params)
-    numerical_calculator.generate_path(T=run_config.option_params.tau, size=(run_config.mc_params.nb_paths, run_config.mc_params.nb_realizations))
-    MCCalculator.show_paths(numerical_calculator)
-
     # European digital
     digital_call_payoff = Payoff.european_digital(option_type="call", params=run_config.option_params)
-    digital_delta_BS = analytical_calculator.delta(digital_call_payoff)
-    digital_call_MSE = numerical_calculator.MSE(eps=run_config.mc_params.eps, payoff=digital_call_payoff, target=digital_delta_BS, do_sanity_check=True)
+    digital_bias = analytical_calculator.cdv_bias.delta(digital_call_payoff, eps=run_config.mc_params.eps)
+    digital_var = analytical_calculator.cdv_var.delta(digital_call_payoff, eps=run_config.mc_params.eps, N=run_config.mc_params.nb_paths)
 
-    print(f"\n\n{digital_call_payoff}")
-    print(f"\nMSE = {digital_call_MSE}")
+    print(f"\n{digital_call_payoff}")
+    print(f"\nbias (BS) = {digital_bias}")
+    print(f"var (BS)  = {digital_var}")
+    print(f"MSE (BS)  = {np.square(digital_bias) + digital_var}")
 
     # European option
     call_option_payoff = Payoff.european_option(option_type="call", params=run_config.option_params)
-    option_delta_BS = analytical_calculator.delta(call_option_payoff)
-    call_option_MSE = numerical_calculator.MSE(eps=run_config.mc_params.eps, payoff=call_option_payoff, target=option_delta_BS, do_sanity_check=True)
+    option_bias = analytical_calculator.cdv_bias.delta(call_option_payoff, eps=run_config.mc_params.eps)
+    option_var = analytical_calculator.cdv_var.delta(call_option_payoff, eps=run_config.mc_params.eps, N=run_config.mc_params.nb_paths)
 
     print(f"\n{call_option_payoff}")
-    print(f"\nMSE = {call_option_MSE}")
+    print(f"\nbias (BS) = {option_bias}")
+    print(f"var (BS)  = {option_var}")
+    print(f"MSE (BS)  = {np.square(option_bias) + option_var}")
