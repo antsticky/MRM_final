@@ -8,7 +8,7 @@
             "name": "Python: risk measures",
             "type": "python",
             "request": "launch",
-            "module": "task1",
+            "module": "example1",
         }
     ]
 }
