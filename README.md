@@ -3,10 +3,10 @@
 ## Summary
 
 In this document we will focus on a market where the stock price assumed to follow a log-normal diﬀusion process on the interval $[0,T]$:
-```latex
+<pre xml:lang="latex">
 \textrm{d} S_t = S_t \left( r \textrm{d} t + \sigma \textrm{d} W_t\right),
 \label{eq:log_norm_diff}
-```
+</pre>
 and we will discuss the precision of the best Monte-Carlo model (with fix $N=5000$ paths) for two derivatives which behaves very differently. The comparison will be made analytically and for numerically on a concrete parameter set:
 \begin{equation}
 r = 0.01, S_0 = 1, \sigma = 0.4, T = 0.25\textrm{Y} \, .
